@@ -6,7 +6,7 @@ echo "===> submit job for JOBNAME: $JOB_NAME"
 
 WORK_DIR='/workspace'
 
-CHECKPOINT_PATH=/data/ckpt/llama3-8b-tp2-pp4-vp2-1001/
+CHECKPOINT_PATH=/data/ckpt/deepseek-7b-tp2-pp4-vp2-1001/
 CKPT_DEP_PATH=${WORK_DIR}/ckpt-dep/
 VOCAB_FILE=${CKPT_DEP_PATH}gpt2-vocab.json
 MERGE_FILE=${CKPT_DEP_PATH}gpt2-merges.txt

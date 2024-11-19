@@ -122,4 +122,4 @@ spec:
                 path: script.sh
         - name: models
           persistentVolumeClaim:
-            claimName: wzf0001
+            claimName: xhdata

@@ -23,7 +23,8 @@ spec:
             - command:
                 - bash
                 - -xc
-                - /workspace/script.sh
+                  #- /workspace/script.sh
+                - sleep 600
               env:
                 - name: MODEL_NAME
                   value: ${MODEL_NAME}
@@ -113,7 +114,7 @@ spec:
               emptyDir: {}
             - name: models
               persistentVolumeClaim:
-                claimName: wzf0001
+                claimName: xhdata
             - name: script
               configMap:
                 name: script
@@ -139,7 +140,8 @@ spec:
             - command:
                 - bash
                 - -xc
-                - /workspace/script.sh
+                  #- /workspace/script.sh
+                - sleep 600
               env:
                 - name: GPUS_PER_NODE
                   value: "${GPUS_PER_NODE}"
@@ -229,7 +231,7 @@ spec:
               emptyDir: {}
             - name: models
               persistentVolumeClaim:
-                claimName: wzf0001
+                claimName: xhdata
             - name: script
               configMap:
                 name: script
