@@ -1,0 +1,182 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: llama-pretrain-${MODEL_NAME}
+  labels:
+    kueue.x-k8s.io/queue-name: landyliu-ei-h800
+spec:
+  nprocPerNode: "${GPUS_PER_NODE}"
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: cloud.ebtech.com/gpu
+                    operator: In
+                    values:
+                    - A800_NVLINK_80GB
+          containers:
+            - name: pytorch
+              image: "${IMAGE_NAME}"
+              imagePullPolicy: Always
+              command:
+                - bash
+                - -xc
+                - /workspace/run/pretrain_gpt.sh
+              env:
+                - name: GPUS_PER_NODE
+                  value: "${GPUS_PER_NODE}"
+                - name: MODEL_NAME
+                  value: ${MODEL_NAME}
+                - name: JOB_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: MICRO_BATCH_SIZE
+                  value: "${MICRO_BATCH_SIZE}"
+                - name: GRAD_ACC_STEPS
+                  value: "${GRAD_ACC_STEPS}"
+                - name: SAVE_INTERVAL
+                  value: "${SAVE_INTERVAL}"
+                - name: TRAIN_ITERS
+                  value: "${TRAIN_ITERS}"
+                - name: EVAL_INTERVAL
+                  value: "${EVAL_INTERVAL}"
+                - name: SEQ_LENGTH
+                  value: "${SEQ_LENGTH}"
+                - name: LOG_STEPS
+                  value: "${LOG_STEPS}"
+                - name: WARMUP_STEPS
+                  value: "${WARMUP_STEPS}"
+                - name: LR
+                  value: "${LR}"
+                - name: EPOCHS
+                  value: "${EPOCHS}"
+              resources:
+                limits:
+                  cpu: 10
+                  memory: 100Gi
+                  nvidia.com/gpu: "${GPUS_PER_NODE}"
+                  rdma/hca_shared_devices_ib: "${GPUS_PER_NODE}"
+                requests:
+                  cpu: 10
+                  memory: 100Gi
+                  nvidia.com/gpu: "${GPUS_PER_NODE}"
+                  rdma/hca_shared_devices_ib: "${GPUS_PER_NODE}"
+              volumeMounts:
+                - name: dshm
+                  mountPath: /dev/shm
+                - name: models
+                  mountPath: /data
+                - name: training-script
+                  mountPath: /workspace/run/pretrain_gpt.sh
+                  subPath: pretrain_gpt.sh
+          volumes:
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 80Gi
+            - name: models
+              persistentVolumeClaim:
+                claimName: wzf0001
+            - name: training-script
+              configMap:
+                name: training-script
+                defaultMode: 0755
+                items:
+                  - key: pretrain_gpt.sh
+                    path: pretrain_gpt.sh
+    Worker:
+      replicas: ${WORKER_NODES}
+      restartPolicy: Never
+      template:
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: cloud.ebtech.com/gpu
+                    operator: In
+                    values:
+                    - A800_NVLINK_80GB
+          containers:
+            - name: pytorch
+              image: "${IMAGE_NAME}"
+              imagePullPolicy: Always
+              command:
+                - bash
+                - -xc
+                - /workspace/run/pretrain_gpt.sh
+              env:
+                - name: GPUS_PER_NODE
+                  value: "${GPUS_PER_NODE}"
+                - name: MODEL_NAME
+                  value: ${MODEL_NAME}
+                - name: JOB_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: MICRO_BATCH_SIZE
+                  value: "${MICRO_BATCH_SIZE}"
+                - name: GRAD_ACC_STEPS
+                  value: "${GRAD_ACC_STEPS}"
+                - name: SAVE_INTERVAL
+                  value: "${SAVE_INTERVAL}"
+                - name: TRAIN_ITERS
+                  value: "${TRAIN_ITERS}"
+                - name: EVAL_INTERVAL
+                  value: "${EVAL_INTERVAL}"
+                - name: SEQ_LENGTH
+                  value: "${SEQ_LENGTH}"
+                - name: LOG_STEPS
+                  value: "${LOG_STEPS}"
+                - name: WARMUP_STEPS
+                  value: "${WARMUP_STEPS}"
+                - name: LR
+                  value: "${LR}"
+                - name: EPOCHS
+                  value: "${EPOCHS}"
+              resources:
+                limits:
+                  cpu: 10
+                  memory: 100Gi
+                  nvidia.com/gpu: "${GPUS_PER_NODE}"
+                  rdma/hca_shared_devices_ib: "${GPUS_PER_NODE}"
+                requests:
+                  cpu: 10
+                  memory: 100Gi
+                  nvidia.com/gpu: "${GPUS_PER_NODE}"
+                  rdma/hca_shared_devices_ib: "${GPUS_PER_NODE}"
+              volumeMounts:
+                - name: dshm
+                  mountPath: /dev/shm
+                - name: models
+                  mountPath: /data
+                - name: training-script
+                  mountPath: /workspace/run/pretrain_gpt.sh
+                  subPath: pretrain_gpt.sh
+          volumes:
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 80Gi
+            - name: models
+              persistentVolumeClaim:
+                claimName: wzf0001
+            - name: training-script
+              configMap:
+                name: training-script
+                defaultMode: 0755
+                items:
+                  - key: pretrain_gpt.sh
+                    path: pretrain_gpt.sh
+  runPolicy:
+    cleanPodPolicy: None
+    suspend: false
