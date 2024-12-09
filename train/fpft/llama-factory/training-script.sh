@@ -42,7 +42,7 @@ TRAIN_ARGS="--dataset_dir ${DATASET_DIR:-/data/models/data} \
 	--evaluation_strategy steps \
 	--load_best_model_at_end \
 	--learning_rate 5e-5 \
-	--val_size 10 \
+	--val_size 100000 \
 	--plot_loss \
 	--bf16 true \
 	--warmup_ratio 0.02 \
