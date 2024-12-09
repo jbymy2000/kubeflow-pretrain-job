@@ -1,7 +1,9 @@
 #!/bin/bash
-
+MODEL_NAME=deepseek-llm-7b-base
 export NCCL_IB_DISABLE=1
-
+export WANDB_BASE_URL=https://api.wandb.ai
+export WANDB_API_KEY=23e33709521e1212abbf9804ee10421ec38dcb7a
+export WANDB_PROJECT=my-pretrain
 NNODES=${NNODES:-${PET_NNODES}}
 NODE_RANK=${NODE_RANK:-${PET_NODE_RANK}}
 DATASET_TEMPLATE=${DATASET_TEMPLATE:-deepseek}
@@ -13,7 +15,7 @@ DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE \
 	--master_addr $MASTER_ADDR \
 	--master_port $MASTER_PORT"
 
-TRAIN_ARGS="--dataset_dir ${DATASET_DIR:-/app/data} \
+TRAIN_ARGS="--dataset_dir ${DATASET_DIR:-/data/models/data} \
 	--dataset ${DATASET:-wiki_demo} \
 	--stage pt \
 	--do_train True \
@@ -51,7 +53,7 @@ TRAIN_ARGS="--dataset_dir ${DATASET_DIR:-/app/data} \
 	--weight_decay 0.01 \
 	--max_grad_norm 1.0 \
 	--save_total_limit 10 \
-	--max_steps 100 \
+	--max_steps 50000 \
 	--streaming False \
 	--deepspeed $DEEPSPEED_CONFIG"
 

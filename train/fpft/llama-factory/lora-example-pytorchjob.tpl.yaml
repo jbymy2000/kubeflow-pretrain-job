@@ -91,7 +91,7 @@ spec:
               emptyDir: {}
             - name: models
               persistentVolumeClaim:
-                claimName: wzf0001
+                claimName: xhdata
             - name: script
               configMap:
                 name: llama-factory-lora-pt
@@ -185,7 +185,7 @@ spec:
               emptyDir: {}
             - name: models
               persistentVolumeClaim:
-                claimName: wzf0001
+                claimName: xhdata
             - name: script
               configMap:
                 name: llama-factory-lora-pt
